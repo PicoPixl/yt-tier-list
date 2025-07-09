@@ -1,6 +1,6 @@
 # Beautiful Tier List Maker
 
-A web-based drag-and-drop **Tier List Maker** designed to let you create stunning tier lists—complete with images and emojis—with lightning-fast simplicity and a sleek, responsive interface. Perfect for gamers, content creators, educators, and anyone who loves ranking their favorites!
+A web-based drag-and-drop **Tier List Maker** designed to let you create stunning tier lists—complete with images and emojis—with lightning-fast simplicity and a sleek, responsive interface. Perfect for gamers, content creators, educators, and anyone who loves ranking their favorites! Download it to run locally, serve it via a web server, or try a live version at [Picopixl.com](https://www.picopixl.com/tools/tier_list_maker.html)!
 
 ![image](https://github.com/user-attachments/assets/a8caa571-dcbf-48dd-a9be-9b34148bd563)
 
