@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beautiful Tier List Maker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            animation: slideIn 0.8s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 60px 0 60px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .upload-btn, .export-btn, .reset-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .upload-btn:hover, .export-btn:hover, .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .tier-list {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .tier-row {
+            display: flex;
+            margin-bottom: 15px;
+            min-height: 100px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .tier-row:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .tier-label {
+            min-width: 108px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+        }
+
+        .tier-content {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            gap: 10px;
+            flex-wrap: wrap;
+            min-height: 100px;
+            border: 2px dashed transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tier-content.drag-over {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .tier-s { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+        .tier-a { background: linear-gradient(135deg, #ffa726, #ff8f00); }
+        .tier-b { background: linear-gradient(135deg, #66bb6a, #43a047); }
+        .tier-c { background: linear-gradient(135deg, #42a5f5, #1e88e5); }
+        .tier-d { background: linear-gradient(135deg, #ab47bc, #8e24aa); }
+        .tier-e { background: linear-gradient(135deg, #78909c, #546e7a); }
+        .tier-f { background: linear-gradient(135deg, #8d6e63, #5d4037); }
+
+        .item-pool {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+        }
+
+        .item-pool h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .pool-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            min-height: 120px;
+            border: 2px dashed #ddd;
+            border-radius: 12px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .pool-content.drag-over {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .tier-item {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tier-item:active {
+            cursor: grabbing;
+        }
+
+        .tier-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .tier-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .tier-item .delete-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(255, 71, 87, 0.3);
+        }
+
+        .tier-item:hover .delete-btn {
+            display: flex;
+        }
+
+        .dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+            z-index: 1000;
+        }
+
+        .tier-label-edit {
+            background: none;
+            border: none;
+            color: inherit;
+            font: inherit;
+            text-align: center;
+            width: 100%;
+            outline: none;
+        }
+
+        .tier-label-edit:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .upload-area.drag-over {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .tier-row {
+                flex-direction: column;
+            }
+            
+            .tier-label {
+                min-width: 100%;
+                min-height: 50px;
+            }
+            
+            .controls {
+                display: flex;
+                gap: 15px;
+                margin: 60px 0;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        .tier-checkboxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .tier-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .tier-checkbox:hover {
+            background: #e9ecef;
+        }
+
+        .tier-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        .tier-checkbox label {
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #ccc;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(30px);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .modal-btn.secondary {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .editable-title {
+            background: none;
+            border: none;
+            font: inherit;
+            text-align: center;
+            width: 100%;
+            outline: none;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .editable-title:focus {
+            background: #667eea;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .editable-subtitle {
+            background: none;
+            border: none;
+            font: inherit;
+            text-align: center;
+            width: 100%;
+            outline: none;
+            color: #666;
+        }
+
+        .editable-subtitle:focus {
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 4px;
+            padding: 2px 8px;
+        }
+
+        /* Dark mode styles */
+        body.dark-mode {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        body.dark-mode .container {
+            background: rgba(45, 52, 54, 0.95);
+            color: #ecf0f1;
+        }
+
+        body.dark-mode .tier-list {
+            background: #34495e;
+        }
+
+        body.dark-mode .item-pool {
+            background: #34495e;
+        }
+
+        body.dark-mode .item-pool h3 {
+            color: #ecf0f1;
+        }
+
+        body.dark-mode .tier-content {
+            background: rgba(52, 73, 94, 0.9);
+        }
+
+        body.dark-mode .pool-content {
+            border-color: #5a6c7d;
+        }
+
+        body.dark-mode .upload-area {
+            border-color: #5a6c7d;
+            color: #bdc3c7;
+        }
+
+        body.dark-mode .upload-area:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        body.dark-mode .modal-content {
+            background: #34495e;
+            color: #ecf0f1;
+        }
+
+        body.dark-mode .tier-checkbox {
+            background: #2c3e50;
+        }
+
+        body.dark-mode .tier-checkbox:hover {
+            background: #3b4a5c;
+        }
+
+        body.dark-mode .theme-toggle {
+            background: #2c3e50;
+        }
+
+        body.dark-mode .toggle-switch {
+            background: #5a6c7d;
+        }
+
+        body.dark-mode .toggle-switch.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        body.dark-mode .editable-subtitle {
+            color: #bdc3c7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><input type="text" class="editable-title" value="Beautiful Tier List Maker" maxlength="50"></h1>
+            <p><input type="text" class="editable-subtitle" value="Create stunning tier lists with drag-and-drop simplicity" maxlength="100"></p>
+        </div>
+
+        <div class="tier-list" id="tierList">
+            <div class="tier-row">
+                <div class="tier-label tier-s">
+                    <input type="text" class="tier-label-edit" value="S" maxlength="10">
+                </div>
+                <div class="tier-content" data-tier="s"></div>
+            </div>
+            <div class="tier-row">
+                <div class="tier-label tier-a">
+                    <input type="text" class="tier-label-edit" value="A" maxlength="10">
+                </div>
+                <div class="tier-content" data-tier="a"></div>
+            </div>
+            <div class="tier-row">
+                <div class="tier-label tier-b">
+                    <input type="text" class="tier-label-edit" value="B" maxlength="10">
+                </div>
+                <div class="tier-content" data-tier="b"></div>
+            </div>
+            <div class="tier-row">
+                <div class="tier-label tier-c">
+                    <input type="text" class="tier-label-edit" value="C" maxlength="10">
+                </div>
+                <div class="tier-content" data-tier="c"></div>
+            </div>
+            <div class="tier-row">
+                <div class="tier-label tier-d">
+                    <input type="text" class="tier-label-edit" value="D" maxlength="10">
+                </div>
+                <div class="tier-content" data-tier="d"></div>
+            </div>
+            <div class="tier-row" data-tier="e" style="display: none;">
+                <div class="tier-label tier-e">
+                    <input type="text" class="tier-label-edit" value="E" maxlength="10">
+                </div>
+                <div class="tier-content" data-tier="e"></div>
+            </div>
+            <div class="tier-row" data-tier="f" style="display: none;">
+                <div class="tier-label tier-f">
+                    <input type="text" class="tier-label-edit" value="F" maxlength="10">
+                </div>
+                <div class="tier-content" data-tier="f"></div>
+            </div>
+        </div>
+
+        <div class="item-pool">
+            <h3>📦 Item Pool</h3>
+            <div class="pool-content" id="poolContent"></div>
+            <div class="upload-area" id="uploadArea">
+                <p>📁 Drag images here or click "Upload Images" to add items</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="upload-btn" onclick="document.getElementById('imageInput').click()">
+                📷 Upload Images
+            </button>
+            <input type="file" id="imageInput" class="file-input" multiple accept="image/*">
+            <button class="export-btn" onclick="exportTierList()">
+                💾 Export as PNG
+            </button>
+            <button class="upload-btn" onclick="openPropertiesModal()">
+                ⚙️ Properties
+            </button>
+            <button class="reset-btn" onclick="resetTierList()">
+                🔄 Reset All
+            </button>
+        </div>
+
+        <!-- Properties Modal -->
+        <div id="propertiesModal" class="modal">
+            <div class="modal-content">
+                <h2>⚙️ Properties</h2>
+                
+                <div class="tier-checkboxes">
+                    <div class="tier-checkbox">
+                        <input type="checkbox" id="tier-s" checked>
+                        <label for="tier-s">S Tier</label>
+                    </div>
+                    <div class="tier-checkbox">
+                        <input type="checkbox" id="tier-a" checked>
+                        <label for="tier-a">A Tier</label>
+                    </div>
+                    <div class="tier-checkbox">
+                        <input type="checkbox" id="tier-b" checked>
+                        <label for="tier-b">B Tier</label>
+                    </div>
+                    <div class="tier-checkbox">
+                        <input type="checkbox" id="tier-c" checked>
+                        <label for="tier-c">C Tier</label>
+                    </div>
+                    <div class="tier-checkbox">
+                        <input type="checkbox" id="tier-d" checked>
+                        <label for="tier-d">D Tier</label>
+                    </div>
+                    <div class="tier-checkbox">
+                        <input type="checkbox" id="tier-e">
+                        <label for="tier-e">E Tier</label>
+                    </div>
+                    <div class="tier-checkbox">
+                        <input type="checkbox" id="tier-f">
+                        <label for="tier-f">F Tier</label>
+                    </div>
+                </div>
+
+                <div class="theme-toggle">
+                    <span>☀️ Light</span>
+                    <div class="toggle-switch" id="themeToggle" onclick="toggleTheme()">
+                        <div class="toggle-slider"></div>
+                    </div>
+                    <span>🌙 Dark</span>
+                </div>
+
+                <div class="modal-buttons">
+                    <button class="modal-btn secondary" onclick="closePropertiesModal()">Cancel</button>
+                    <button class="modal-btn primary" onclick="applyProperties()">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let itemCounter = 0;
+
+        // File upload handling
+        document.getElementById('imageInput').addEventListener('change', handleFileSelect);
+        document.getElementById('uploadArea').addEventListener('click', () => {
+            document.getElementById('imageInput').click();
+        });
+
+        // Drag and drop for file upload
+        const uploadArea = document.getElementById('uploadArea');
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => uploadArea.classList.add('drag-over'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('drag-over'), false);
+        });
+
+        uploadArea.addEventListener('drop', handleDrop, false);
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            handleFiles(files);
+        }
+
+        function handleFiles(files) {
+            [...files].forEach(uploadFile);
+        }
+
+        function uploadFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please upload only image files.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                createTierItem(e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function createTierItem(imageSrc, text = '') {
+            const item = document.createElement('div');
+            item.className = 'tier-item';
+            item.draggable = true;
+            item.id = 'item-' + itemCounter++;
+
+            if (imageSrc) {
+                const img = document.createElement('img');
+                img.src = imageSrc;
+                item.appendChild(img);
+            } else {
+                item.textContent = text || '?';
+                item.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+                item.style.color = 'white';
+                item.style.fontWeight = 'bold';
+            }
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.innerHTML = '×';
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                item.remove();
+            };
+            item.appendChild(deleteBtn);
+
+            item.addEventListener('dragstart', handleDragStart);
+            item.addEventListener('dragend', handleDragEnd);
+
+            document.getElementById('poolContent').appendChild(item);
+        }
+
+        // Drag and drop for tier items
+        let draggedItem = null;
+
+        function handleDragStart(e) {
+            draggedItem = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            draggedItem = null;
+            // Remove drag-over class from all drop zones
+            document.querySelectorAll('.drag-over').forEach(el => {
+                el.classList.remove('drag-over');
+            });
+        }
+
+        // Setup drop zones
+        const tierContents = document.querySelectorAll('.tier-content');
+        const poolContent = document.getElementById('poolContent');
+
+        [...tierContents, poolContent].forEach(zone => {
+            zone.addEventListener('dragover', handleDragOver);
+            zone.addEventListener('dragenter', handleDragEnter);
+            zone.addEventListener('dragleave', handleDragLeave);
+            zone.addEventListener('drop', handleDropItem);
+        });
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            this.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            if (!this.contains(e.relatedTarget)) {
+                this.classList.remove('drag-over');
+            }
+        }
+
+        function handleDropItem(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+            
+            if (draggedItem && this !== draggedItem.parentNode) {
+                this.appendChild(draggedItem);
+            }
+        }
+
+        // Export functionality
+        function exportTierList() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const tierList = document.getElementById('tierList');
+            
+            // Set canvas size
+            canvas.width = 1200;
+            canvas.height = 600;
+            
+            // Fill background
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Add white background for tier list
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.roundRect(50, 50, canvas.width - 100, canvas.height - 100, 20);
+            ctx.fill();
+            
+            // Add title
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 32px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('My Tier List', canvas.width / 2, 100);
+            
+            // This is a simplified export - for full functionality, you'd need html2canvas library
+            alert('Export feature would require html2canvas library for full functionality. This is a demo implementation.');
+            
+            // For now, let's trigger a download of the canvas
+            const link = document.createElement('a');
+            link.download = 'tier-list.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        function resetTierList() {
+            if (confirm('Are you sure you want to reset everything?')) {
+                // Clear all tier contents
+                document.querySelectorAll('.tier-content').forEach(content => {
+                    content.innerHTML = '';
+                });
+                
+                // Clear pool
+                document.getElementById('poolContent').innerHTML = '';
+                
+                // Reset tier labels
+                const labels = ['S', 'A', 'B', 'C', 'D'];
+                document.querySelectorAll('.tier-label-edit').forEach((input, index) => {
+                    input.value = labels[index];
+                });
+                
+                itemCounter = 0;
+            }
+        }
+
+        // Add some sample items
+        function addSampleItems() {
+            const sampleItems = ['🎮', '🎯', '🎲', '🎪', '🎨', '🎭', '🎪', '🎯'];
+            sampleItems.forEach(item => createTierItem(null, item));
+        }
+
+        // Properties modal functions
+        function openPropertiesModal() {
+            // Sync the current tier visibility state with checkboxes
+           const tiers = ['s', 'a', 'b', 'c', 'd', 'e', 'f'];
+            tiers.forEach((tier, index) => {
+                const checkbox = document.getElementById(`tier-${tier}`);
+                let tierRow;
+
+                // For S, A, B, C, D tiers (first 5), select by index since they don't have data-tier attributes
+               if (index < 5) {
+                   tierRow = document.querySelectorAll('#tierList .tier-row')[index];
+                } else {
+                    // For E and F tiers, select by data-tier attribute
+                   tierRow = document.querySelector(`#tierList [data-tier="${tier}"]`);
+                }
+
+               if (checkbox && tierRow) {
+                   checkbox.checked = tierRow.style.display !== 'none';
+               }
+           });
+
+    // Sync theme toggle state
+    const themeToggle = document.getElementById('themeToggle');
+    if (document.body.classList.contains('dark-mode')) {
+        themeToggle.classList.add('active');
+    } else {
+        themeToggle.classList.remove('active');
+    }
+
+    document.getElementById('propertiesModal').style.display = 'block';
+}
+        function closePropertiesModal() {
+            document.getElementById('propertiesModal').style.display = 'none';
+        }
+
+        function toggleTheme() {
+            const themeToggle = document.getElementById('themeToggle');
+            themeToggle.classList.toggle('active');
+        }
+
+        function applyProperties() {
+            const tiers = ['s', 'a', 'b', 'c', 'd', 'e', 'f'];
+
+            tiers.forEach((tier, index) => {
+                const checkbox = document.getElementById(`tier-${tier}`);
+                let tierRow;
+
+                // For S–D tiers (first 5), select by index
+                if (index < 5) {
+                    tierRow = document.querySelectorAll('#tierList .tier-row')[index];
+                } else {
+                    // For E and F tiers, use data-tier attribute
+                    tierRow = document.querySelector(`#tierList [data-tier="${tier}"]`);
+                }
+
+                if (tierRow && checkbox) {
+                    const tierContent = tierRow.querySelector('.tier-content');
+                    const poolContent = document.getElementById('poolContent');
+
+                    if (!checkbox.checked) {
+                        // ✅ Defensive check: move children BEFORE hiding the row
+                        while (tierContent.firstChild) {
+                            poolContent.appendChild(tierContent.firstChild);
+                        }
+
+                        tierRow.style.display = 'none';
+                    } else {
+                        tierRow.style.display = 'flex';
+                    }
+                }
+            });
+
+            // Apply dark mode
+            const themeToggle = document.getElementById('themeToggle');
+            if (themeToggle.classList.contains('active')) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+
+            // ✅ Refresh drop zones and re-bind events
+            refreshDropZones();
+
+            // ✅ Close modal
+            closePropertiesModal();
+        }
+
+
+
+        function bindDragEventsToItem(item) {
+            // Make sure we're not re-binding multiple times
+            item.removeEventListener('dragstart', handleDragStart);
+            item.removeEventListener('dragend', handleDragEnd);
+
+            item.addEventListener('dragstart', handleDragStart);
+            item.addEventListener('dragend', handleDragEnd);
+
+            // Re-bind delete button event
+            const deleteBtn = item.querySelector('.delete-btn');
+            if (deleteBtn) {
+                // Remove previous click listener if any (optional, for safety)
+                deleteBtn.onclick = null;
+
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    item.remove();
+                };
+            }
+        }
+
+        function refreshDropZones() {
+            const tierContents = document.querySelectorAll('.tier-content');
+            const poolContent = document.getElementById('poolContent');
+
+            [...tierContents, poolContent].forEach(zone => {
+                const newZone = zone.cloneNode(true);
+                zone.parentNode.replaceChild(newZone, zone);
+            });
+
+            const newTierContents = document.querySelectorAll('.tier-content');
+            const newPoolContent = document.getElementById('poolContent');
+
+            [...newTierContents, newPoolContent].forEach(zone => {
+                zone.addEventListener('dragover', handleDragOver);
+                zone.addEventListener('dragenter', handleDragEnter);
+                zone.addEventListener('dragleave', handleDragLeave);
+                zone.addEventListener('drop', handleDropItem);
+            });
+
+            // 🧠 Ensure this is at the bottom
+            document.querySelectorAll('.tier-item').forEach(bindDragEventsToItem);
+        }
+
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('propertiesModal');
+            if (event.target === modal) {
+                closePropertiesModal();
+            }
+        };
+
+        // Initialize with sample items
+        addSampleItems();
+
+        // Add rounded rectangle support for older browsers
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.lineTo(x + width - radius, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.lineTo(x + width, y + height - radius);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.lineTo(x + radius, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.lineTo(x, y + radius);
+                this.quadraticCurveTo(x, y, x + radius, y);
+                this.closePath();
+            };
+        }
+    </script>
+</body>
+</html>
